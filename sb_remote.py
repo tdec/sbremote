@@ -22,7 +22,7 @@ except:
 
 skip_types = ["sponsor", "selfpromo"]
 proj_name = "SBRemote"
-proj_version = "0.2"
+proj_version = "0.2.1"
 janky_restart = True
 announce_skips = True
 
@@ -63,9 +63,11 @@ fi
 
 def restart_script():
     """ This is a bad way to do things, but until all stalling bugs are fixed, it's better than nothing """
-#    os.system(f"./restart.sh {os.getpid()}")
     print("================ RESTARTING ===============")
-    os.system(f"docker exec sbremote docker restart sbremote")
+    if(os.path.exists('/.dockerenv')):
+        os.system(f"docker exec sbremote docker restart sbremote")
+    else:
+        os.system(f"./restart.sh {os.getpid()}")
 
 def simplify_segments(segments):
     """ Throw away a bunch of the interformation in the skip segments to keep things simple """
