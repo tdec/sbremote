@@ -16,6 +16,16 @@ You should just need a computer with Python 3 installed. The support libraries a
 2. Run `./setup.sh`. This will create a venv environment in the current directory and install required libraries.
 3. Run `./runme.sh`. This will start the program and allow you to pair with an Apple TV. Leave this program running in the background.
 
+## Docker
+
+For the first usage and to create your appletv.json file, use the usage instructions above. 
+
+To build a docker image, run `sudo docker build -t sbremote .`
+To run the docker image, run `docker run -d --name sbremote --restart=unless-stopped --network=host -v /var/run/docker.sock:/var/run/docker.sock:ro sbremote`
+
+The restart logic has been changed for now to restart the docker image every once in a while, as I didn't feel like debugging why the restart logic was needed there in the first place. 
+
+## Troubleshooting
 ## Configuration
 
 ### What gets skipped?
@@ -33,7 +43,6 @@ Please note that the process of identifying a video and getting the list of skip
 
 Entries are added to a cache. The SponsorBlock data is considered "fresh" for 12 hours, meaning after 12 hours we will request a new update from SponsorBlock. This helps when a new video comes out and doesn't have an entry yet. However, the first lookup (to find the video ID) isn't performed if the channel name and video title haven't changed.
 
-## Troubleshooting
 
 ### ~~A literal bug~~
 

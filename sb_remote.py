@@ -20,7 +20,7 @@ except:
     sys.exit(-1)
 
 
-skip_types = ["sponsor", "selfpromo", "intro", "outro"]
+skip_types = ["sponsor", "selfpromo"]
 proj_name = "SBRemote"
 proj_version = "0.2"
 janky_restart = True
@@ -63,7 +63,9 @@ fi
 
 def restart_script():
     """ This is a bad way to do things, but until all stalling bugs are fixed, it's better than nothing """
-    os.system(f"./restart.sh {os.getpid()}")
+#    os.system(f"./restart.sh {os.getpid()}")
+    print("================ RESTARTING ===============")
+    os.system(f"docker exec sbremote docker restart sbremote")
 
 def simplify_segments(segments):
     """ Throw away a bunch of the interformation in the skip segments to keep things simple """
@@ -192,7 +194,7 @@ async def main_loop():
 
     last_state = ""
     hold_count = 0
-    restart_time = 900
+    restart_time = 3600
     sleep_time = 1.0
     v = {}
     last_hl = ""
@@ -206,8 +208,8 @@ async def main_loop():
         sys.stderr.flush()
         if janky_restart:
             runtime = time.time() - runstart
-            if runtime > restart_time-10:
-                print ("Nearing restart")
+#            if runtime > restart_time-10:
+#                print ("Nearing restart")
             if runtime > restart_time and not is_near_skip:
                 restart_script()
         
@@ -246,35 +248,39 @@ async def main_loop():
                     print (f"Error during lookup: {ex}")
                     segments = {}
                     skipped_segments = []
-
-            last_hl = hl            
-            stxt = json.dumps(segments)
-            if state_changed or hold_count == 0:
+                stxt = json.dumps(segments)
                 print_state(str(wp))
                 print ("{:>13} {:}".format("ID:", id))
                 print ("{:>13} {:}".format("Segments:", stxt))
-                if len(skipped_segments) > 0:
-                    print ("{:>13} {:}".format("Skipped:", skipped_segments))
-                print ("")
-                hold_count = 5
-            else:
-                if hold_count > 0:
-                    hold_count -= 1
+
+            last_hl = hl            
+#            stxt = json.dumps(segments)
+#            if state_changed or hold_count == 0:
+#                print_state(str(wp))
+#                print ("{:>13} {:}".format("ID:", id))
+#                print ("{:>13} {:}".format("Segments:", stxt))
+#                if len(skipped_segments) > 0:
+#                    print ("{:>13} {:}".format("Skipped:", skipped_segments))
+#                print ("")
+#                hold_count = 5
+#            else:
+#                if hold_count > 0:
+#                    hold_count -= 1
 
             if is_playing:
                 is_near_skip = False
                 if near_skip(segments, wp.position):
                     is_near_skip = True
                     print ("========== Approaching skip ==========")
-                    sleep_time = 0.5
+                    sleep_time = 1
                 else:
                     sleep_time = 1
                 
                 did_skip = await do_skip_now(segments, wp.position, remote)
                 if did_skip:
-                    print ("*"*80)
-                    print ("We skipped something, yeah!".center(80))
-                    print ("*"*80)
+#                    print ("*"*80)
+#                    print ("We skipped something, yeah!".center(80))
+#                    print ("*"*80)
                     if remove_segment_after_skip:
                         segments.remove(did_skip)
                         skipped_segments.append(did_skip)
